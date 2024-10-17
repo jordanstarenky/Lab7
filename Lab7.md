@@ -11,7 +11,7 @@ library(bruceR)
 ```
 
     ## 
-    ## bruceR (v2023.9)
+    ## bruceR (v2024.6)
     ## Broadly Useful Convenient and Efficient R functions
     ## 
     ## Packages also loaded:
@@ -36,17 +36,11 @@ library(bruceR)
     ## https://psychbruce.github.io/bruceR
     ## 
     ## To use this package in publications, please cite:
-    ## Bao, H.-W.-S. (2023). bruceR: Broadly useful convenient and efficient R functions (Version 2023.9) [Computer software]. https://CRAN.R-project.org/package=bruceR
-
-    ## 
-    ## NEWS: A new version of bruceR (2024.6) is available (2024-06-13)!
-    ## 
-    ## ***** Please update *****
-    ## install.packages("bruceR", dep=TRUE)
+    ## Bao, H.-W.-S. (2024). bruceR: Broadly useful convenient and efficient R functions (Version 2024.6) [Computer software]. https://CRAN.R-project.org/package=bruceR
 
     ## 
     ## These packages are dependencies of `bruceR` but not installed:
-    ## - pacman, lmtest, vars, phia
+    ## - pacman, openxlsx, ggtext, lmtest, vars, phia, MuMIn, GGally
     ## 
     ## ***** Install all dependencies *****
     ## install.packages("bruceR", dep=TRUE)
@@ -55,8 +49,6 @@ library(bruceR)
 library(dplyr)
 library(ggstatsplot)
 ```
-
-    ## Warning: package 'ggstatsplot' was built under R version 4.3.3
 
     ## You can cite this package as:
     ##      Patil, I. (2021). Visualizations with statistical details: The 'ggstatsplot' approach.
@@ -67,23 +59,19 @@ library(performance)
 library(sjPlot)
 ```
 
-    ## Registered S3 methods overwritten by 'broom':
-    ##   method            from  
-    ##   tidy.glht         jtools
-    ##   tidy.summary.glht jtools
-
-    ## #refugeeswelcome
+    ## Install package "strengejacke" from GitHub (`devtools::install_github("strengejacke/strengejacke")`) to load all sj-packages at once!
 
 ``` r
-ex <- read_sav("C:/Users/Colin/Documents/GitHub/Website/Lab7/ex.sav")
+ex <- read_sav("/Users/jostarenky/Documents/GitHub/Lab7/ex.sav")
 
-lab7<-read.csv("C:/Users/Colin/Documents/GitHub/Website/Lab7/lab7.csv")
+lab7<-read.csv("/Users/jostarenky/Documents/GitHub/Lab7/lab7.csv")
 ```
 
 # Correlation
 
 ``` r
 #First, you will need to select variables or composites of interest
+#We don't need "participant ID" bc why would we want to correlate that
 
 ex <- ex %>%
   select(Conscientiousness, AverageHoursofSleep, GPA)
@@ -127,7 +115,7 @@ ggplot(ex, aes(x = Conscientiousness, y = GPA)) + geom_point() + geom_smooth() +
     ## : neighborhood radius 2.02
 
     ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
-    ## : reciprocal condition number 3.4517e-17
+    ## : reciprocal condition number 8.9711e-17
 
     ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
     ## : There are other near singularities as well. 1
@@ -145,7 +133,7 @@ ggplot(ex, aes(x = Conscientiousness, y = GPA)) + geom_point() + geom_smooth() +
     ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
     ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : reciprocal condition
-    ## number 3.4517e-17
+    ## number 8.9711e-17
 
     ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
     ## else if (is.data.frame(newdata))
@@ -167,10 +155,12 @@ ggplot(ex, aes(x = Conscientiousness, y = GPA)) + geom_point() + geom_smooth(met
 
 ``` r
 #step 1: build a model
+#GPA -> we are looking to predict GPA using cons. and sleep
 model<-lm(GPA ~ Conscientiousness + AverageHoursofSleep, data = ex)
 
 
 #step 2: check the assumptions
+#most important: colinearity should be low, other assumptions r whatever
 check_model(model)
 ```
 
@@ -178,6 +168,7 @@ check_model(model)
 
 ``` r
 #step 3: summarize results; add ,std = TRUE if you want to get standardized coefficients
+#remember: when looking at check for multicolinearity, VIF should be below 5
 model_summary(model)
 ```
 
@@ -301,6 +292,7 @@ R<sup>2</sup> / R<sup>2</sup> adjusted
 
 ``` r
 #step 4: plot the results; change type ="est" to type = "std" if you want to plot the standardized coefficients
+#the graph shows the unstandardized coef. + confidence interval
 plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", line.size = 1.5, dot.size = 2.5, colors = "blue") + theme_bruce()
 ```
 
@@ -308,10 +300,81 @@ plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", 
 
 # Q1: Use the Corr or the ggcorrmat function to plot the correlation between all variables. Which personality traits are correlated with satisfaction with life and which one is not?
 
+Extraversion, agreeableness, conscientiousness, and emotional stability
+are correlated with life satisfaction. Openness is not correlated with
+life satisfaction.
+
+``` r
+ggcorrmat(lab7)
+```
+
+![](Lab7_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
 # Q2: Run a multiple regression using the Big 5 personality traits to predict satisfaction with life and plot the results
 
 ``` r
 #for this lab assignment you would assume assumptions are met, but for your own analysis, you will need to examine assumptions carefully
+
+
+#step 1: build a model
+model<-lm(SWL ~ Extraversion + Agreeableness + Conscientiousness + EmotionalStability + Openness, data = lab7)
+
+#step 3: summarize results; add ,std = TRUE if you want to get standardized coefficients
+model_summary(model)
 ```
 
+    ## 
+    ## Model Summary
+    ## 
+    ## ───────────────────────────────
+    ##                     (1) SWL    
+    ## ───────────────────────────────
+    ## (Intercept)           2.191 ***
+    ##                      (0.308)   
+    ## Extraversion          0.140 ***
+    ##                      (0.036)   
+    ## Agreeableness         0.062    
+    ##                      (0.049)   
+    ## Conscientiousness     0.019    
+    ##                      (0.051)   
+    ## EmotionalStability    0.134 ** 
+    ##                      (0.043)   
+    ## Openness             -0.101 *  
+    ##                      (0.046)   
+    ## ───────────────────────────────
+    ## R^2                   0.138    
+    ## Adj. R^2              0.123    
+    ## Num. obs.           294        
+    ## ───────────────────────────────
+    ## Note. * p < .05, ** p < .01, *** p < .001.
+    ## 
+    ## # Check for Multicollinearity
+    ## 
+    ## Low Correlation
+    ## 
+    ##                Term  VIF   VIF 95% CI Increased SE Tolerance Tolerance 95% CI
+    ##        Extraversion 1.26 [1.14, 1.50]         1.12      0.79     [0.67, 0.88]
+    ##       Agreeableness 1.34 [1.20, 1.59]         1.16      0.75     [0.63, 0.83]
+    ##   Conscientiousness 1.36 [1.21, 1.61]         1.16      0.74     [0.62, 0.83]
+    ##  EmotionalStability 1.42 [1.26, 1.68]         1.19      0.70     [0.59, 0.79]
+    ##            Openness 1.28 [1.15, 1.52]         1.13      0.78     [0.66, 0.87]
+
+``` r
+#step 4: plot the results; change type ="est" to type = "std" if you want to plot the standardized coefficients
+plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", line.size = 1.5, dot.size = 2.5, colors = "pink") + theme_bruce()
+```
+
+![](Lab7_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
 # Q3: Interpret the R2. Which personality trait(s) can explain unique variance in satisfaction with life when controlling for each other, and which ones cannot? If someone asks you for advice on how to improve life satisfaction, based on your results, which personality trait would you recommend them to change and why?
+
+Extraversion and emotional stability can explain unique variance in SWL
+when controlling for other predictors, while conscientiousness and
+agreeableness cannot. Additionally, it looks like openness has a
+negative relationship with SWL when using a multiple regression
+analysis, so it can also explain unique variance with life satisfaction.
+Based on these results, I would recommend for someone to increase their
+extraversion and/or their emotional stability in order to increase their
+life satisfaction. I probably wouldn’t recommend for them to decrease
+their openness as this would likely have some other adverse effects on
+other areas of their life based on existing theories of personality.

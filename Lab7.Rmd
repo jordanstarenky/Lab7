@@ -13,9 +13,9 @@ library(ggstatsplot)
 library(performance)
 library(sjPlot)
 
-ex <- read_sav("C:/Users/Colin/Documents/GitHub/Website/Lab7/ex.sav")
+ex <- read_sav("/Users/jostarenky/Documents/GitHub/Lab7/ex.sav")
 
-lab7<-read.csv("C:/Users/Colin/Documents/GitHub/Website/Lab7/lab7.csv")
+lab7<-read.csv("/Users/jostarenky/Documents/GitHub/Lab7/lab7.csv")
 
 
 
@@ -24,6 +24,7 @@ lab7<-read.csv("C:/Users/Colin/Documents/GitHub/Website/Lab7/lab7.csv")
 # Correlation
 ```{r}
 #First, you will need to select variables or composites of interest
+#We don't need "participant ID" bc why would we want to correlate that
 
 ex <- ex %>%
   select(Conscientiousness, AverageHoursofSleep, GPA)
@@ -49,13 +50,16 @@ ggplot(ex, aes(x = Conscientiousness, y = GPA)) + geom_point() + geom_smooth(met
 # Regression
 ```{r}
 #step 1: build a model
+#GPA -> we are looking to predict GPA using cons. and sleep
 model<-lm(GPA ~ Conscientiousness + AverageHoursofSleep, data = ex)
 
 
 #step 2: check the assumptions
+#most important: colinearity should be low, other assumptions r whatever
 check_model(model)
 
 #step 3: summarize results; add ,std = TRUE if you want to get standardized coefficients
+#remember: when looking at check for multicolinearity, VIF should be below 5
 model_summary(model)
 
 
@@ -63,6 +67,7 @@ model_summary(model)
 tab_model(model)
 
 #step 4: plot the results; change type ="est" to type = "std" if you want to plot the standardized coefficients
+#the graph shows the unstandardized coef. + confidence interval
 plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", line.size = 1.5, dot.size = 2.5, colors = "blue") + theme_bruce()
 
 ```
@@ -70,15 +75,34 @@ plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", 
 
 
 # Q1: Use the Corr or the ggcorrmat function to plot the correlation between all variables. Which personality traits are correlated with satisfaction with life and which one is not? 
+Extraversion, agreeableness, conscientiousness, and emotional stability are correlated with life satisfaction. Openness is not correlated with life satisfaction.
+
 ```{r}
+
+
+ggcorrmat(lab7)
+
+
 
 ```
 
 # Q2: Run a multiple regression using the Big 5 personality traits to predict satisfaction with life and plot the results
+
 ```{r}
 #for this lab assignment you would assume assumptions are met, but for your own analysis, you will need to examine assumptions carefully
+
+
+#step 1: build a model
+model<-lm(SWL ~ Extraversion + Agreeableness + Conscientiousness + EmotionalStability + Openness, data = lab7)
+
+#step 3: summarize results; add ,std = TRUE if you want to get standardized coefficients
+model_summary(model)
+
+#step 4: plot the results; change type ="est" to type = "std" if you want to plot the standardized coefficients
+plot_model(model,  type ="est",  show.values = TRUE, vline.color = "#1B191999", line.size = 1.5, dot.size = 2.5, colors = "pink") + theme_bruce()
 
 
 ```
 
 # Q3: Interpret the R2. Which personality trait(s) can explain unique variance in satisfaction with life when controlling for each other, and which ones cannot? If someone asks you for advice on how to improve life satisfaction, based on your results, which personality trait would you recommend them to change and why? 
+Extraversion and emotional stability can explain unique variance in SWL when controlling for other predictors, while conscientiousness and agreeableness cannot. Additionally, it looks like openness has a negative relationship with SWL when using a multiple regression analysis, so it can also explain unique variance with life satisfaction. Based on these results, I would recommend for someone to increase their extraversion and/or their emotional stability in order to increase their life satisfaction. I probably wouldn't recommend for them to decrease their openness as this would likely have some other adverse effects on other areas of their life based on existing theories of personality.
